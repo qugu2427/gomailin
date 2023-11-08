@@ -1,4 +1,4 @@
-# go-mailin
+# gomailin
 A simple golang module for accepting email sent via SMTP.
 
 ## A Simple Example
