@@ -1,6 +1,9 @@
-package mailin
+package main
+
+// package mailin
 
 import (
+	"net"
 	"strings"
 )
 
@@ -21,7 +24,13 @@ type session struct {
 }
 
 func (s *session) toEmail() Email {
-	return Email{}
+	return Email{
+		s.helloFrom,
+		net.IP(s.senderAddr),
+		s.mailFrom,
+		s.rcptTos,
+		s.body,
+	}
 }
 
 func (s *session) fillDefaultVals() {
@@ -43,7 +52,7 @@ func (s *session) isComplete() bool {
 /*
 takes a request and delegates to sub functions
 */
-func (s *session) handleRequest(req string, emailHandler func(Email)) (resCode uint16, resMsg string) {
+func (s *session) handleRequest(req string, emailHandler EmailHandler) (resCode uint16, resMsg string) {
 	if s.hasBodyStarted && !s.hasBodyCompleted {
 		return s.handleBody(req)
 	}
@@ -128,8 +137,16 @@ func (s *session) handleRcpt(req string) (resCode uint16, resMsg string) {
 		if len(sections) == 2 && strings.ToUpper(sections[0]) == "RCPT TO" {
 			isFound, email := findEmailInLine(sections[1])
 			if isFound {
-				s.rcptTos = append(s.rcptTos, email)
-				return CodeOk, MsgOk
+
+				// Check if rcpt is found
+				if RcptVerifyHandler != nil &&
+					!RcptVerifyHandler(email) {
+					return CodeRcptNotFound, MsgRcptNotFound
+				} else {
+					s.rcptTos = append(s.rcptTos, email)
+					return CodeOk, MsgOk
+				}
+
 			} else {
 				return CodeSyntaxErr, MsgSyntaxErr
 			}
@@ -159,7 +176,7 @@ func (s *session) handleBody(req string) (resCode uint16, resMsg string) {
 	}
 }
 
-func (s *session) handleQuit(req string, emailHandler func(Email)) (resCode uint16, resMsg string) {
+func (s *session) handleQuit(req string, emailHandler EmailHandler) (resCode uint16, resMsg string) {
 	if s.isComplete() {
 		emailHandler(s.toEmail()) // TODO decide how to handle return
 	}

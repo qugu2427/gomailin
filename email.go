@@ -1,4 +1,6 @@
-package mailin
+package main
+
+// package mailin
 
 import "net"
 
@@ -7,5 +9,5 @@ type Email struct {
 	MailFromAddr net.IP
 	MailFrom     string
 	Recipients   []string
-	Headers      map[string]string
+	Body         string
 }

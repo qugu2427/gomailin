@@ -1,13 +1,27 @@
 # gomailin
-A simple golang module for accepting email sent via SMTP.
+A simple golang module for accepting email sent via SMTP.<br>
+Mailin provides two ways to listen for emails: ```SimpleListen()``` and ```Listen()```
 
-## A Simple Example
+## SimpleListen()
+Sometimes we do not care about the nitty-gritty details of email... Sometimes we just want to recieve emails!<br>
+SimpleListen() performs NO AUTHENTICATION. SimpleListen() does not check whether emails are forged, properly formatted, spam, etc.
+
+```go
+    mailin.SimpleListen(
+        listenUrl, // host and port to listen for emails (ex: "0.0.0.0:25")
+        tlsCrt, 
+        tlsKey, // if tlsCrt and tlsKey are both "", mailin will listen over unencrypted TCP
+        emailHandler // a func(mailin.Email) to handle recieved emails
+        )
+```
+
+## A SimpleListen Example
 ```go
 package main
 
 import mailin, "github.com/qugu2427/go-mailin"
 
-func handleEmail(e mailin.Email) {
+func handleEmail(email mailin.Email) {
 	fmt.Println(email)
 }
 
@@ -18,13 +32,10 @@ func main() {
         we will listen over unencrypted TCP
     */
     tlsCrt := ""
-    tlsKet := ""
+    tlsKey := ""
 
-	err := mailin.Listen("0.0.0.0:25", "", "", handleEmail)
+	err := mailin.SimpleListen("0.0.0.0:25", tlsCrt, tlsKey, handleEmail)
 	panic(err)
 }
 ```
-\*\*\* **IMPORTANT**: mailin performs NO VERIFICATION by default \*\*\*
-
-## A More Secure Example
-TODO
+**IMPORTANT**: simple listen performs NO AUTENTICATION

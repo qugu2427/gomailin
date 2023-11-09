@@ -1,4 +1,6 @@
-package mailin
+package main
+
+// package mailin
 
 import (
 	"fmt"
@@ -20,7 +22,7 @@ func handleConnection(conn net.Conn, emailHandler EmailHandler) {
 
 	// For each tcp packet (i.e each request)
 	for {
-		pktBuffer := make([]byte, 1024)
+		pktBuffer := make([]byte, PktBufferSizeLimit)
 
 		pktSize, err := conn.Read(pktBuffer)
 		if err != nil {
@@ -34,12 +36,12 @@ func handleConnection(conn net.Conn, emailHandler EmailHandler) {
 		req := string(pktBuffer[:pktSize])
 
 		resCode, resMsg := session.handleRequest(req, emailHandler)
-		res := fmt.Sprintf("%d %s %s", resCode, resMsg, Crlf)
+		res := fmt.Sprintf("%d %s%s", resCode, resMsg, Crlf)
 		if resCode != CodeDontRespond {
 			_, _ = conn.Write([]byte(res))
-		} else if resCode == CodeBye {
-			_, _ = conn.Write([]byte(res))
-			return
+			if resCode == CodeBye {
+				return
+			}
 		}
 	}
 }
