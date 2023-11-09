@@ -1,6 +1,4 @@
-package main
-
-// package mailin
+package mailin
 
 import "strings"
 

@@ -1,6 +1,4 @@
-package main
-
-// package mailin
+package mailin
 
 import (
 	"fmt"
@@ -26,6 +24,8 @@ func handleConnection(conn net.Conn, emailHandler EmailHandler) {
 
 		pktSize, err := conn.Read(pktBuffer)
 		if err != nil {
+			logMsg := fmt.Sprintf("ERROR: failed connection with %s (%s)", conn.RemoteAddr(), err)
+			LogHandler(logMsg)
 			break
 		} else if pktSize >= PktBufferSizeLimit {
 			errMsg := fmt.Sprintf("%d PACKET SIZE MUST BE <%d%s", CodeReady, PktBufferSizeLimit, Crlf)

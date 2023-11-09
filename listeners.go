@@ -1,10 +1,10 @@
-package main
-
-// package mailin
+package mailin
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net"
+	"time"
 )
 
 func startListenerTCP(
@@ -19,10 +19,12 @@ func startListenerTCP(
 
 	for {
 		conn, err := listener.Accept()
-		// TODO PROD set read deadline
 		if err != nil {
+			logMsg := fmt.Sprintf("ERROR: failed TCP(no TLS) listen with %s (%s)", conn.RemoteAddr(), err)
+			LogHandler(logMsg)
 			continue
 		}
+		conn.SetDeadline(time.Now().Add(10 * time.Second))
 		go connHandler(conn, emailHandler)
 	}
 }
@@ -50,10 +52,12 @@ func startListenerTLS(
 
 	for {
 		conn, err := listener.Accept()
-		// TODO PROD set read deadline
 		if err != nil {
+			logMsg := fmt.Sprintf("ERROR: failed TCP/TLS listen with %s (%s)", conn.RemoteAddr(), err)
+			LogHandler(logMsg)
 			continue
 		}
+		conn.SetDeadline(time.Now().Add(10 * time.Second))
 		go connHandler(conn, emailHandler)
 	}
 }

@@ -1,16 +1,14 @@
-package main
+package mailin
 
-// package mailin
-
-import "net"
+import (
+	"net"
+)
 
 type EmailHandler = func(Email)
 type ConnHandler = func(net.Conn, EmailHandler)
-type LogHandler = func(string)
 
 var RcptVerifyHandler func(rcpt string) bool = nil
-
-// var SpfHandler func(host string, addr net.IP) bool = nil
+var LogHandler func(string) = func(string) {}
 
 var (
 	PktBufferSizeLimit int = 1025
